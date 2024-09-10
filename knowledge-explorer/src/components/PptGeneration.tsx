@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { generatePpt } from '../services/api';
+import { PptGenerationResult } from '../types';
 
 const PptGeneration: React.FC = () => {
   const [topic, setTopic] = useState('');
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<PptGenerationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -13,9 +14,9 @@ const PptGeneration: React.FC = () => {
     setError(null);
     try {
       const data = await generatePpt(topic);
-      setResult(JSON.stringify(data, null, 2));
+      setResult(data);
     } catch (err) {
-      setError('Failed to generate PowerPoint');
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     }
     setIsLoading(false);
   };
@@ -36,7 +37,13 @@ const PptGeneration: React.FC = () => {
         </button>
       </form>
       {error && <p className="error">{error}</p>}
-      {result && <pre>{result}</pre>}
+      {result && (
+        <div>
+          <h3>Generation Result:</h3>
+          <p>{result.message}</p>
+          <p>File Name: {result.fileName}</p>
+        </div>
+      )}
     </div>
   );
 };

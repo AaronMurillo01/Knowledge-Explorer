@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { performWebSearch } from '../services/api';
+import { WebSearchResult } from '../types';
 
 const WebSearch: React.FC = () => {
   const [query, setQuery] = useState('');
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<WebSearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -13,9 +14,9 @@ const WebSearch: React.FC = () => {
     setError(null);
     try {
       const data = await performWebSearch(query);
-      setResult(JSON.stringify(data, null, 2));
+      setResult(data);
     } catch (err) {
-      setError('Failed to perform web search');
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     }
     setIsLoading(false);
   };
@@ -36,7 +37,18 @@ const WebSearch: React.FC = () => {
         </button>
       </form>
       {error && <p className="error">{error}</p>}
-      {result && <pre>{result}</pre>}
+      {result && (
+        <div>
+          <h3>Search Result:</h3>
+          <p>Abstract: {result.abstract}</p>
+          <h4>Related Topics:</h4>
+          <ul>
+            {result.relatedTopics.map((topic, index) => (
+              <li key={index}>{topic}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
